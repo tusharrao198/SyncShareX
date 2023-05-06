@@ -1,0 +1,2 @@
+# SyncShareX
+Realtime File Sync
