@@ -1,0 +1,26 @@
+{
+	"name": "syncsharex",
+	"version": "1.0.0",
+	"description": "Realtime File Sync",
+	"main": "server.js",
+	"scripts": {
+		"start": "server.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tusharrao198/SyncShareX.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/tusharrao198/SyncShareX/issues"
+	},
+	"homepage": "https://github.com/tusharrao198/SyncShareX#readme",
+	"dependencies": {
+		"express": "^4.18.2",
+		"rsync": "^0.6.1",
+		"socket.io": "^4.6.1"
+	}
+}
