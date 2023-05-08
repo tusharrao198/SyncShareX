@@ -95,7 +95,7 @@ async function listFiles(authClient) {
     return;
   }
 
-  console.log('Files:');
+  console.log('Found Files:');
   // files.map((file) => {
   //   console.log(`${file.name} (${file.id})`);
   // });
