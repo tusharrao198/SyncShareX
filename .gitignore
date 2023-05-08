@@ -1,0 +1,7 @@
+node_modules/*
+*.conf
+token.json
+credentials.json
+dist/*
+rclone.exe
+*.zip
