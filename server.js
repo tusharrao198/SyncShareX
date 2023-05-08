@@ -1,78 +1,116 @@
+// Require dependencies
 const express = require('express');
+const formidable = require('formidable');
+const chokidar = require('chokidar');
+const rsync = require('rsync');
+const path = require('path');
+
+// Set up Express app
 const app = express();
 const http = require('http').createServer(app);
+
+// Set up Socket.IO server
 const io = require('socket.io')(http);
-const { spawn } = require('child_process');
 
+// Set up static file serving
+app.use(express.static('public'));
 
+// Set up EJS view engine
+app.set('view engine', 'ejs');
+
+// Set up routes
+app.get('/', (req, res) => {
+  res.render('index');
+});
+
+// Set up file upload route
 app.post('/upload', (req, res) => {
-  const fileId = generateId(); // generate a unique ID for the file
-  const filePath = `/path/to/uploads/${fileId}`; // set the file path
-  const rsyncArgs = ['-avz', req.file.path, filePath]; // set the rsync arguments
+  // Create new Formidable form
+  const form = new formidable.IncomingForm();
 
-  const rsyncProcess = spawn('rsync', rsyncArgs); // spawn a new rsync process
+  // Set the upload directory
+  form.uploadDir = path.join(__dirname, '/public/source');
 
-  rsyncProcess.on('close', (code) => {
-    if (code === 0) {
-      io.emit('fileAdded', fileId); // send a real-time update to all connected clients
-      res.send('File uploaded successfully.');
-    } else {
-      res.status(500).send('Error uploading file.');
+  // Parse the form data
+  form.parse(req, (err, fields, files) => {
+    if (err) {
+      console.error(err);
+      return;
     }
+
+    // Get the file path
+    const filePath = files.file.path;
+
+    // Sync the local folder with the remote folder using rsync
+    const rsyncProcess = new rsync()
+      .flags(['-avz', '--delete'])
+      .source(form.uploadDir)
+      .destination('sicmundus@172.16.12.136:/home/sicmundus/MyProjects/SyncShareX/public/uploads');
+
+    rsyncProcess.execute(() => {
+      console.log('Local folder synced with remote folder');
+      // Broadcast the updated file list to all connected clients
+      broadcastFilesList();
+    });
   });
 });
 
-app.get('/download/:id', (req, res) => {
-  const fileId = req.params.id;
-  const filePath = `/path/to/uploads/${fileId}`; // set the file path
-  res.download(filePath); // send the file to the client for download
-});
-
+// Set up Socket.IO server to handle client connections
 io.on('connection', (socket) => {
-  console.log('A user connected');
-  const files = getSharedFiles(); // get a list of shared files from the server
-  socket.emit('filesList', files); // send the list of shared files to the connected client
+  console.log(`Client ${socket.id} connected`);
 
-  socket.on('downloadFile', (fileId) => {
-    const downloadUrl = `/download/${fileId}`; // set the download URL
-    socket.emit('fileDownloadUrl', downloadUrl); // send the download URL to the connected client
-  });
+  // Broadcast the updated file list to all connected clients
+  // broadcastFilesList();
 
-  // handle disconnection
+  // Handle client disconnections
   socket.on('disconnect', () => {
-    console.log('A user disconnected');
+    console.log(`Client ${socket.id} disconnected`);
   });
 });
 
+// Watch for changes in the local folder and sync with the remote folder using rsync
+const localPath = path.join(__dirname, '/public/uploads');
+const remotePath = 'sicmundus@172.16.12.136:/home/sicmundus/MyProjects/SyncShareX/public/uploads';
+const watcher = chokidar.watch(localPath);
 
-function getSharedFiles() {
-  const files = fs.readdirSync('/path/to/uploads'); // get a list of files in the uploads directory
-  return files.map((file) => {
-    return {
-      id: file,
-      name: file,
-      size: getFileSize(`/path/to/uploads/${file}`),
-      type: getFileType(`/path/to/uploads/${file}`),
-    };
+
+
+function broadcastFilesList() {
+  const rsyncProcess = new rsync()
+    .flags(['--list-only'])
+    .source(remotePath);
+  
+  // console.log("rsyncProcess = ", rsyncProcess);
+  
+  rsyncProcess.execute((err, stdout) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+
+    console.log("stdout = ", stdout);
+    const files = stdout.split('\n')
+      .filter(line => line.startsWith('d') || line.startsWith('-'))
+      .map(line => line.split(' ').pop());
+    io.emit('files_list', files);
   });
 }
 
+watcher.on('all', (event, path) => {
+  const rsyncProcess = new rsync()
+    .flags(['-avz', '--delete'])
+    .source(localPath)
+    .destination(remotePath);
 
-function getFileSize(filePath) {
-  const stats = fs.statSync(filePath);
-  const fileSizeInBytes = stats.size;
-  return formatBytes(fileSizeInBytes);
-}
+  rsyncProcess.execute(() => {
+    console.log(`Local folder synced with remote folder: ${event} ${path}`);
+    // Broadcast the updated file list to all connected clients
+    // broadcastFilesList();
+  });
+});
 
-function getFileType(filePath) {
-  return mime.getType(filePath);
-}
-
-function formatBytes(bytes, decimals = 2) {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-}
+// Start the server
+const PORT = process.env.PORT || 3000;
+http.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
