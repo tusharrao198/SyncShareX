@@ -10,15 +10,22 @@
     <body>
         <h1>File Sharing App</h1>
         <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Default</span>
+                <input type="text" class="form-control" aria-label="Sizing example input"
+                    aria-describedby="inputGroup-sizing-default">
+            </div>
             <input type="file" name="file">
             <button type="submit">Upload</button>
         </form>
         <ul id="files-list"></ul>
 
         <script src="/socket.io/socket.io.js"></script>
+        <!-- <script src="https://code.jquery.com/jquery-1.11.1.js"></script> -->
         <script>
             const socket = io();
-
+            console.log("socket = ", socket);
             socket.on('files_list', (files) => {
                 const filesList = document.getElementById('files-list');
                 while (filesList.firstChild) {
