@@ -24,35 +24,13 @@ app.get('/', (req, res) => {
 });
 
 // Set up file upload route
-app.post('/upload', (req, res) => {
-  // Create new Formidable form
-  const form = new formidable.IncomingForm();
+app.post('/upload', async (req, res) => {
+  console.log(req);
 
-  // Set the upload directory
-  form.uploadDir = path.join(__dirname, '/public/source');
+  res.setHeader("Content-Type", "application/json");
+  res.end(JSON.stringify({ msg: "data" }));
 
-  // Parse the form data
-  form.parse(req, (err, fields, files) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-
-    // Get the file path
-    const filePath = files.file.path;
-
-    // Sync the local folder with the remote folder using rsync
-    const rsyncProcess = new rsync()
-      .flags(['-avz', '--delete'])
-      .source(form.uploadDir)
-      .destination('sicmundus@172.16.12.136:/home/sicmundus/MyProjects/SyncShareX/public/uploads');
-
-    rsyncProcess.execute(() => {
-      console.log('Local folder synced with remote folder');
-      // Broadcast the updated file list to all connected clients
-      broadcastFilesList();
-    });
-  });
+  
 });
 
 // Set up Socket.IO server to handle client connections
