@@ -1,20 +1,28 @@
 const path = require("path");
 const express = require("express");
 const port = process.env.PORT || 5000;
-// const passport = require("passport");
-// const mongoose = require("mongoose");
+const passport = require("passport");
+const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-// const session = require("express-session");
-// const MongoStore = require("connect-mongo");
-// const { authCheck } = require("./middleware/auth");
-// const authRoutes = require("./routes/authroutes");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
+const { authCheck } = require("./middleware/auth");
+const authRoutes = require("./routes/authroutes");
 const syncroutes = require("./routes/syncroutes");
 var url = require("url");
 
+const connectDB = require("./config/db");
+
 // Load config
 require("dotenv").config({ path: "./config/config.env" });
-const app = express();
 
+// Passport Config
+require("./config/passport")(passport);
+
+// connect to Database
+connectDB();
+
+const app = express();
 // Configure bodyParser
 app.use(bodyParser.json());
 app.use(
@@ -42,13 +50,48 @@ app.use(function (req, res, next) {
 	next();
 });
 
+// Sessions middleware
+app.use(
+	session({
+		secret: process.env.SECRET,
+		resave: false,
+		saveUninitialized: false,
+		store: MongoStore.create({ mongoUrl: process.env.MONGO_DATABASE_URI }),
+	})
+);
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Routes
-// app.use("/auth", authRoutes);
+app.use("/auth", authRoutes);
 app.use("/", syncroutes);
 
 app.get("/", async (req, res) => {
-	res.render("index", {});
+	console.log("req.session.user = ", req.session.user);
+	const userDetails = require("./models/User");
+
+	if (req.isAuthenticated()) {
+		const userID = req.user._id;
+		let user = await userDetails.findOne({ _id: userID });
+		res.render("index", {
+			authenticated: req.isAuthenticated(),
+			username:
+				user != null || user !== undefined ? user.displayName : null,
+		});
+	} else {
+		// console.log("NOT AUTHENTICATED");
+		res.render("index", {
+			authenticated: req.isAuthenticated(),
+		});
+		// res.setHeader("Content-Type", "application/json");
+		// res.end(JSON.stringify({ msg: "No user logged in!" }));
+
+	}
+
+	// res.render("index", { authenticated: false, });
+
 });
 
 //The 404 Route (ALWAYS Keep this as the last route)

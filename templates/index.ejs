@@ -9,6 +9,14 @@
 	</head>
 	<body>
 		<div class="container">
+			<div><% if(!authenticated){ %>
+				<h1>SIGN IN </h1>
+				<a id="sign" href="/auth/google"><i class="fa-brands fa-google"></i> SignIn</a>
+				<% }else{ %>
+				<h1>Logged in as: <%= username %></h1>
+				<a id="sign" href="/auth/logout"><i class="fa-brands fa-google"></i> Logout</a>
+				<% } %>
+			</div>
 			</br>
 			</br>
 			</br>
@@ -29,7 +37,16 @@
 					</div>
 				</div>
 				</br></br>
-				<button type="submit" class="btn btn-primary">Sync</button>
+				<div><% if(authenticated){ %>
+					<h1>SYNC </h1>
+					<button type="submit" class="btn btn-primary">Sync</button>
+					<% }else{ %>
+						<button disabled="true" type="submit" class="btn btn-primary">Sync</button>
+					<% } %>
+				</div>
+
+				
+
 			</form>
 
 		</div>
