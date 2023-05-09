@@ -39,7 +39,9 @@
 		"prompt-sync": "^4.2.0",
 		"rclone.js": "^0.6.6",
 		"rsync": "^0.6.1",
-		"socket.io": "^4.6.1"
+		"socket.io": "^4.6.1",
+		"utility-logger": "^0.1.4",
+		"uuid": "^9.0.0"
 	},
 	"pkg": {
 		"assets": [

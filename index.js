@@ -11,7 +11,13 @@ const authRoutes = require("./routes/authroutes");
 const syncroutes = require("./routes/syncroutes");
 var url = require("url");
 const chokidar = require('chokidar');
-const {readTokenFromOriginalConfig} = require("./utils");
+const { readTokenFromOriginalConfig } = require("./utils");
+
+const UtilityLogger = require('utility-logger');
+const log = new UtilityLogger({ level: 'debug' });
+
+const { v4: uuidv4 } = require('uuid');
+var ejs = require('ejs');
 
 const connectDB = require("./config/db");
 
@@ -78,13 +84,39 @@ const io = require('socket.io')(http);
 
 // Set up Socket.IO server to handle client connections
 io.on('connection', (socket) => {
-  console.log(`Client ${socket.id} connected`);
 
-  // Handle client disconnections
-  socket.on('disconnect', () => {
-    console.log(`Client ${socket.id} disconnected`);
-  });
+	console.log(`Client ${socket.id} connected`);	
+
+	socket.on('FirstFunction', () => {
+		console.log("This is First MEthod");
+	})
+
+	socket.on('SecondFunction', () => {
+		console.log("This is Second MEthod");
+		})
+	socket.on('ThirdFunction', () => {
+		console.log("This is Third MEthod");
+	})
+
+	// Handle client disconnections
+	socket.on('disconnect', () => {
+		console.log(`Client ${socket.id} disconnected`);
+	});
 });
+
+var events = require('events');
+var eventEmitter = new events.EventEmitter();
+
+eventEmitter.on('logging', function (message) {
+	io.emit('log_message', message);
+});
+
+var originConsolelog = console.log;
+console.log = (data) => {
+	eventEmitter.emit('logging', data);
+	originConsolelog(data);
+}
+
 
 // Watch for changes in the local folder and sync with the remote folder using rsync
 var localPath = path.join(__dirname, './source');

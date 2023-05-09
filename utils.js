@@ -86,24 +86,6 @@ async function downloadFile(index) {
 	);
 	console.log("running rclone now");
 
-	// //create rclone process
-	// const rclone = spawn(
-	// 	rclonePath,
-	// 	[
-	// 		"--drive-server-side-across-configs",
-	// 		"--drive-acknowledge-abuse",
-	// 		"--max-transfer=750G",
-	// 		"--config",
-	// 		modified_config,
-	// 		"-P",
-	// 		"sync",
-	// 		"tmp:",
-	// 		destinationList[index]
-	// 	],
-	// 	{ stdio: 
-	// 		"inherit" }
-	// );
-
 	//create rclone process
 	const rclone = spawn(
 		rclonePath,
