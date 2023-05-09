@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const {readTokenFromOriginalConfig, readTokensFromModifiedConfig, downloadFile, readpendingDL } = require("../utils");
 var url = require("url");
-// const { authCheck } = require("../middleware/auth");
+const { authCheck } = require("../middleware/auth");
 
 
 
