@@ -10,6 +10,8 @@ const { authCheck } = require("./middleware/auth");
 const authRoutes = require("./routes/authroutes");
 const syncroutes = require("./routes/syncroutes");
 var url = require("url");
+const chokidar = require('chokidar');
+const {readTokenFromOriginalConfig} = require("./utils");
 
 const connectDB = require("./config/db");
 
@@ -22,7 +24,10 @@ require("./config/passport")(passport);
 // connect to Database
 connectDB();
 
+// Set up Express app
 const app = express();
+const http = require('http').createServer(app);
+
 // Configure bodyParser
 app.use(bodyParser.json());
 app.use(
@@ -68,6 +73,36 @@ app.use(passport.session());
 app.use("/auth", authRoutes);
 app.use("/", syncroutes);
 
+// Set up Socket.IO server
+const io = require('socket.io')(http);
+
+// Set up Socket.IO server to handle client connections
+io.on('connection', (socket) => {
+  console.log(`Client ${socket.id} connected`);
+
+  // Handle client disconnections
+  socket.on('disconnect', () => {
+    console.log(`Client ${socket.id} disconnected`);
+  });
+});
+
+// Watch for changes in the local folder and sync with the remote folder using rsync
+var localPath = path.join(__dirname, './source');
+
+const watcher = chokidar.watch(localPath, {
+	persistent: true
+});
+
+watcher.on('all', async (event, path) => {
+	console.log("\n\n\nwatcher = ", event, " \npath = ", path);
+	context = {
+		localpath: path,
+		destpath: "uploads",
+	}
+	const data = await readTokenFromOriginalConfig(context);
+});
+
+
 app.get("/", async (req, res) => {
 	console.log("req.session.user = ", req.session.user);
 	const userDetails = require("./models/User");
@@ -99,7 +134,7 @@ app.get("*", function (req, res) {
 	res.status(404).send("<h1>404 NOT FOUND!</h1>");
 });
 
-app.listen(port, (err) => {
+http.listen(port, (err) => {
 	if (err) throw err;
 	console.log(`Connection Established!! http://localhost:${port}`);
 });

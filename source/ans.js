@@ -4,7 +4,8 @@ router.post("/upload", async (req, res) => {
 	const data = await readTokenFromOriginalConfig(req.body);
 	console.log("data return = ", data);
 	res.setHeader("Content-Type", "application/json");
-	res.end(JSON.stringify({ msg: data }));
+	resasdasd	
+		.end(JSON.stringify({ msg: data }));
 });
 
-module.exports = router;
+

@@ -22,9 +22,36 @@
 			</br>
 			</br>
 			<h1>File Sharing App</h1>
+			<!-- <form action="/upload" method="POST">
+			
+				<div class="form-group">
+					<div class="input-group mb-3">
+						<span class="input-group-text" id="inputGroup-sizing-default">Enter the local directory path: </span>
+						<input required="true" name="sourcepath" id="sourcepath" type="text" class="form-control"
+							aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"
+							placeholder="Set you source directory">
+					</div>
+				</div>
+				</br></br>
+				<div><% if(authenticated){ %>
+					<h1>SYNC </h1>
+					<button type="submit" class="btn btn-primary">Set</button>
+					<% }else{ %>
+					<button disabled="true" type="submit" class="btn btn-primary">Sync</button>
+					<% } %>
+				</div>
+			</form> -->
+
 			<form action="/upload" method="POST">	
 
 				<div class="form-group">
+					<div class="input-group mb-3">
+						<span class="input-group-text" id="inputGroup-sizing-default">Enter the local directory path: </span>
+						<input required="true" name="sourcepath" id="sourcepath" type="text" class="form-control"
+							aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default"
+							placeholder="Set you source directory">
+					</div>
+					
 					<div class="input-group mb-3">
 						<span class="input-group-text" id="inputGroup-sizing-default">Enter the local directory path: </span>
 						<input required="true" name="localpath" id="localpath" type="text" class="form-control" aria-label="Sizing example input"
