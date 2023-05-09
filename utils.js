@@ -25,10 +25,15 @@ async function readpendingDL(data) {
 		const { localpath, destpath } = data;
 		console.log("Inside readpendingDL  = ", localpath);
 		folderIDList.push(localpath);
+		console.log("asdf = ",data);
 		if (!destpath || destpath == undefined) {
 			destinationList.push("uploads");			
 		} else {
-			destinationList.push(destpath);		
+			if (destinationList[0] === "uploads") {
+				
+			} else {
+				destinationList.push(destpath);			
+			}
 		}
 
 		// let pendingDLContent = fs
