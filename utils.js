@@ -19,45 +19,19 @@ var downloadRetries = 0;
 
 // readpendingDL function reads the list.txt file and add source folder link into folderList array
 // and destination folder into destinationList.
-
-async function readpendingDL(data) {
+function readpendingDL(data) {
 	try {
 		const { localpath, destpath } = data;
 		console.log("Inside readpendingDL  = ", localpath);
 		folderIDList.push(localpath);
-		console.log("asdf = ",data);
-		if (!destpath || destpath == undefined) {
-			destinationList.push("uploads");			
-		} else {
-			if (destinationList[0] === "uploads") {
-				
-			} else {
-				destinationList.push(destpath);			
-			}
+
+		if (destinationList.length === 0) {
+			destinationList.push(destpath);			
 		}
 
-		// let pendingDLContent = fs
-		// 	.readFileSync(pendingDL, { encoding: "utf-8" })
-		// 	.split(/\r?\n/);
-		// for (let i = 0; i < pendingDLContent.length; i++) {
-		// 	// console.log("Reads List.txt file = ", pendingDLContent);
-		// 	// console.log("\nReads List.txt file\n")
-		// 	if (pendingDLContent[i] != "") {
-		// 		let array = pendingDLContent[i].split("===");
-		// 		if (array.length != 2) {
-		// 			console.log(
-		// 				">>>------ 2. Encountered error while parsing this line:\n>>>------ " +
-		// 					pendingDLContent[i]
-		// 			);
-		// 			errorParsingPendingDL = true;
-		// 		} else {
-		// 			folderIDList.push(array[0]);
-		// 			destinationList.push(array[1]);
-		// 		}
-		// 	}
-		// }
 		console.log("FolderList = ", folderIDList);
 		console.log("destination = ", destinationList);
+
 	} catch (e) {
 		console.log(
 			">>>------ 3. Encountered error while trying to read the file list:\n>>>------ " +
@@ -67,12 +41,12 @@ async function readpendingDL(data) {
 	}
 }
 
-async function downloadFile(index) {
+function downloadFile(index) {
 	console.log(
 		">>>------ Copying Folder from " +
 			folderIDList[index] +
 			" to " +
-			destinationList[index]
+			destinationList[0]
 	);
 	if (fs.existsSync(modified_config)) fs.unlinkSync(modified_config);
 	fs.copyFileSync(original_config, modified_config);
@@ -96,20 +70,17 @@ async function downloadFile(index) {
 	// 		"--config",
 	// 		modified_config,
 	// 		"-P",
-	// 		"sync",
+	// 		"copy",
 	// 		"tmp:",
 	// 		destinationList[index]
 	// 	],
-	// 	{ stdio: 
-	// 		"inherit" }
+	// 	{ stdio: "inherit" }
 	// );
 
 	//create rclone process
 	const rclone = spawn(
 		rclonePath,
 		[
-			"--drive-acknowledge-abuse",
-			"--max-transfer=750G",
 			"--config",
 			modified_config,
 			"-P",
@@ -121,7 +92,7 @@ async function downloadFile(index) {
 		],
 		{ stdio: "inherit" }
 	);
-
+	
 	rclone.on("close", (code) => {
 		readTokensFromModifiedConfig();
 		console.log(">>>------ Child process exited with code " + code);
@@ -141,7 +112,7 @@ async function downloadFile(index) {
 	});
 }
 
-async function readTokensFromModifiedConfig() {
+function readTokensFromModifiedConfig() {
 	try {
 		let modifiedConfigContent = fs
 			.readFileSync(modified_config, { encoding: "utf-8" })
@@ -181,6 +152,7 @@ async function readTokensFromModifiedConfig() {
 	}
 }
 
+
 module.exports = {
 	readTokenFromOriginalConfig: async function (data) {
 		try {
@@ -205,7 +177,6 @@ module.exports = {
 		if (token != null) {
 			readpendingDL(data);
 			if (!errorParsingPendingDL && folderIDList.length != 0) {
-				console.log("B");
 				console.log(">>>------ Start");
 				downloadFile(0);
 			}

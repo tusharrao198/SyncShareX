@@ -37,7 +37,6 @@
 		"passport-google-oauth20": "^2.0.0",
 		"pkg": "^5.8.0",
 		"prompt-sync": "^4.2.0",
-		"rclone.js": "^0.6.6",
 		"rsync": "^0.6.1",
 		"socket.io": "^4.6.1"
 	},
