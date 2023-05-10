@@ -78,13 +78,19 @@ const io = require('socket.io')(http);
 
 // Set up Socket.IO server to handle client connections
 io.on('connection', (socket) => {
-  console.log(`Client ${socket.id} connected`);
+  	console.log(`Client ${socket.id} connected`);
 
-  // Handle client disconnections
-  socket.on('disconnect', () => {
-    console.log(`Client ${socket.id} disconnected`);
-  });
+	socket.on('log', (message) => {
+    console.log(`Received log message inside index.js: ${message}`);
+		io.emit('log', message);
+	});
+	
+	// Handle client disconnections
+	socket.on('disconnect', () => {
+		console.log(`Client ${socket.id} disconnected`);
+	});
 });
+
 
 // Watch for changes in the local folder and sync with the remote folder using rsync
 var localPath = path.join(__dirname, './source');
