@@ -22,7 +22,7 @@ var downloadRetries = 0;
 function readpendingDL(data) {
 	try {
 		const { localpath, destpath } = data;
-		console.log("Inside readpendingDL  = ", localpath);
+		// console.log("Inside readpendingDL  = ", localpath);
 		folderIDList.push(localpath);
 
 		if (destinationList.length === 0) {
@@ -42,12 +42,12 @@ function readpendingDL(data) {
 }
 
 function downloadFile(index) {
-	console.log(
-		">>>------ Copying Folder from " +
-			folderIDList[index] +
-			" to " +
-			destinationList[0]
-	);
+	// console.log(
+	// 	">>>------ Copying Folder from " +
+	// 		folderIDList[index] +
+	// 		" to " +
+	// 		destinationList[0]
+	// );
 	if (fs.existsSync(modified_config)) fs.unlinkSync(modified_config);
 	fs.copyFileSync(original_config, modified_config);
 	fs.appendFileSync(
@@ -60,22 +60,6 @@ function downloadFile(index) {
 	);
 	console.log("running rclone now");
 
-	// //create rclone process
-	// const rclone = spawn(
-	// 	rclonePath,
-	// 	[
-	// 		"--drive-server-side-across-configs",
-	// 		"--drive-acknowledge-abuse",
-	// 		"--max-transfer=750G",
-	// 		"--config",
-	// 		modified_config,
-	// 		"-P",
-	// 		"copy",
-	// 		"tmp:",
-	// 		destinationList[index]
-	// 	],
-	// 	{ stdio: "inherit" }
-	// );
 
 	//create rclone process
 	const rclone = spawn(
@@ -87,7 +71,7 @@ function downloadFile(index) {
 			"-v",
 			"sync",
 			`local:${folderIDList[index]}`,
-			`teamdrive-jack:${destinationList[index]}`
+			`teamdrive-jack:${destinationList[0]}`
 			
 		],
 		{ stdio: "inherit" }
@@ -103,7 +87,7 @@ function downloadFile(index) {
 			} else {
 				console.log(">>>------ Encountered an error.");
 			}
-		} else if (index + 1 == folderIDList.length) {
+		} else if (index + 1 == 1) {
 			console.log(">>>------ Finished.");
 		} else {
 			downloadRetries = 0;
@@ -162,7 +146,7 @@ module.exports = {
 			// console.log("config = ", configContent, "\n\n");
 			for (let i = 0; i < configContent.length; i++) {
 				if (configContent[i].startsWith("token = ")) {
-					console.log("token");
+					// console.log("token");
 					token = configContent[i].replace("token = ", "");
 					tokenExpTime = Date.parse(JSON.parse(token).expiry);
 				}

@@ -4,5 +4,7 @@ router.post("/upload", async (req, res) => {
 	resasdasd	
 		.end(JSON.stringify({ msg: data }));
 });
+// chokidar hcal ja 
+
 
 

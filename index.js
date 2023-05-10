@@ -11,6 +11,7 @@ const authRoutes = require("./routes/authroutes");
 const syncroutes = require("./routes/syncroutes");
 var url = require("url");
 const chokidar = require('chokidar');
+const { readTokenFromOriginalConfig } = require("./utils");
 
 const connectDB = require("./config/db");
 
@@ -88,18 +89,18 @@ io.on('connection', (socket) => {
 // Watch for changes in the local folder and sync with the remote folder using rsync
 var localPath = path.join(__dirname, './source');
 
-// const watcher = chokidar.watch(localPath, {
-// 	persistent: true
-// });
+const watcher = chokidar.watch(localPath, {
+	persistent: true
+});
 
-// watcher.on('all', async (event, path) => {
-// 	console.log("\n\n\nwatcher = ", event, " \npath = ", path);
-// 	context = {
-// 		localpath: path,
-// 		destpath: "uploads",
-// 	}
-// 	const data = await readTokenFromOriginalConfig(context);
-// });
+watcher.on('change', async (event, path) => {
+	// console.log("\n\n\nwatcher = ", event, " \npath = ", path);
+	context = {
+		localpath: localPath,
+		destpath: "uploads",
+	}
+	const data = await readTokenFromOriginalConfig(context);
+});
 
 
 app.get("/", async (req, res) => {
