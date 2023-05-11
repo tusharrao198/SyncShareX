@@ -167,6 +167,16 @@ watcher.on('change', async (event, path) => {
 });
 
 
+watcher.on('unlink', async (event, path) => {
+	// console.log("\n\n\nwatcher = ", event, " \npath = ", path);
+	context = {
+		localpath: localPath,
+		destpath: "uploads",
+	}
+	const data = await readTokenFromOriginalConfig(context);
+});
+
+
 app.get("/", async (req, res) => {
 	console.log("req.session.user = ", req.session.user);
 	const userDetails = require("./models/User");
