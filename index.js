@@ -28,6 +28,9 @@ const connectDB = require("./config/db");
 
 // Watch for changes in the local folder and sync with the remote folder using rsync
 var localPath = path.join(__dirname, './source');
+const watcher = chokidar.watch(localPath, {
+	persistent: true
+});
 
 
 // Load config
@@ -95,10 +98,10 @@ const io = require('socket.io')(http);
 io.on('connection', (socket) => {
   	console.log(`Client ${socket.id} connected`);
 
-	socket.on('log', (message) => {
-		console.log(`Received log message inside index.js: ${message}`);
-		io.emit('log', message);
-	});
+	// socket.on('log', (message) => {
+	// 	console.log(`Received log message inside index.js: ${message}`);
+	// 	io.emit('log', message);
+	// });
 
 	socket.on('transfer', (source, dest) => {
 		// Run Rclone with the progress flag and parse the output
@@ -153,10 +156,6 @@ io.on('connection', (socket) => {
 	});
 });
 
-
-const watcher = chokidar.watch(localPath, {
-	persistent: true
-});
 
 watcher.on('change', async (event, path) => {
 	// console.log("\n\n\nwatcher = ", event, " \npath = ", path);
