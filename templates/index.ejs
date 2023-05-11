@@ -45,30 +45,31 @@
 							placeholder="Default remote path set to uploads directory in your drive">
 					</div>
 				</div>
-				</br></br>
-				<div><% if(authenticated){ %>
-					<h1>SYNC </h1>
-					<button type="submit" class="btn btn-primary">Sync</button>
-					<% }else{ %>
-					<button disabled="true" type="submit" class="btn btn-primary">Sync</button>
-					<% } %>
-				</div>
-
-				</br>
-				</br>
-
-				<div class="container">
-					<button id="log-button">Log Message</button>
-					<ul id="log-list"></ul>
-				</div>
-
-
 			</form>
+			</br></br>
+			<div><% if(authenticated){ %>
+				<h1>SYNC </h1>
+				<button id="sync" class="btn btn-primary">Sync</button>
+				<ul id="sync-output"></ul>
+				<% }else{ %>
+				<button disabled="true" class="btn btn-primary">Sync</button>
+				<% } %>
+			</div>
+
+			</br>
+			</br>
+			
+			<div class="container">
+				<button id="log-button">Log Message</button>
+				<ul id="log-list"></ul>
+			</div>
 
 		</div>
 
 		</br>
 		</br>
+
+		<div id="progress"></div>
 
 
 		<script src="scripts/ejs.js"></script>
@@ -94,16 +95,44 @@
 					socket.emit('disconnect', 'Client Disconnecting clicked');
 					socket.disconnect();
 				});
+
+				document.getElementById('sync').addEventListener('click', () => {
+					console.log('Sync Button clicked');
+					// socket.emit('sync', 'Start Syncing');
+
+					const source = document.getElementById("localpath").value;
+					const dest = document.getElementById("destpath").value;
+					socket.emit('transfer', source, dest);
+				});
 			
 
 			}
 
 			socket.on('log', (message) => {
-				console.log(`Received log message inside html: ${message}`);
+					console.log(`Received log message inside html: ${message}`);
+					const listItem = document.createElement('li');
+					listItem.innerText = message;
+					document.getElementById('log-list').appendChild(listItem);
+				});
+
+			socket.on('sync-output', (message) => {
+				console.log(`Received sync-output message inside html: ${message}`);
 				const listItem = document.createElement('li');
 				listItem.innerText = message;
-				document.getElementById('log-list').appendChild(listItem);
+				document.getElementById('sync-output').appendChild(listItem);
+				listItem.innerText = "Sync - Successful!";
+				document.getElementById('sync-output').appendChild(listItem);
 			});
+
+			socket.on('progress', (data) => {
+				const progress = document.getElementById('progress');
+				const listItem = document.createElement('li');
+				listItem.innerText = data;
+				progress.appendChild(listItem);
+			});
+
+
+
 		</script>
 	</body>
 

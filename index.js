@@ -13,7 +13,22 @@ var url = require("url");
 const chokidar = require('chokidar');
 const { readTokenFromOriginalConfig } = require("./utils");
 
+
+"use strict";
+var url = require("url");
+const fs = require("fs");
+const { spawn } = require("child_process");
+const original_config = "rclone.conf";
+const rclonePath = "rclone"; // Change the rclonePath if rclone is not in the system path
+var folderIDList = [];
+var destinationList = [];
+
+
 const connectDB = require("./config/db");
+
+// Watch for changes in the local folder and sync with the remote folder using rsync
+var localPath = path.join(__dirname, './source');
+
 
 // Load config
 require("dotenv").config({ path: "./config/config.env" });
@@ -81,8 +96,55 @@ io.on('connection', (socket) => {
   	console.log(`Client ${socket.id} connected`);
 
 	socket.on('log', (message) => {
-    console.log(`Received log message inside index.js: ${message}`);
+		console.log(`Received log message inside index.js: ${message}`);
 		io.emit('log', message);
+	});
+
+	socket.on('transfer', (source, dest) => {
+		// Run Rclone with the progress flag and parse the output
+			
+			console.log("Run Rclone with the progress flag and parse the output");
+			const gclone = spawn(
+				rclonePath,
+				[
+					"--config",
+					original_config,
+					"-P",
+					"-v",
+					"sync",
+					`local:${source}`,
+					`teamdrive-jack:${dest}`
+					
+				],
+				{ stdio: ['inherit', 'pipe', 'pipe'], }
+			);
+				
+			gclone.stdout.on('data', (data) => {
+				const lines = data.toString().split('\n');
+				// console.log("\n\nlinesssss = ", lines, "\n\n");
+				lines.forEach((line) => {
+					// console.log("A = " ,line);
+					socket.emit('progress', line);
+				});
+			});
+
+			gclone.stderr.on('data', (data) => {
+				console.error(data.toString());
+			});
+
+			gclone.on('close', (code) => {
+				console.log(`Rclone process exited with code ${code}`);
+			});
+	});
+
+	socket.on('sync', (message) => {
+		console.log(`Received log message inside index.js: ${message}`);
+			context = {
+		localpath: localPath,
+		destpath: "uploads",
+	}
+		readTokenFromOriginalConfig(context)
+		io.emit('sync-output', message);
 	});
 	
 	// Handle client disconnections
@@ -91,9 +153,6 @@ io.on('connection', (socket) => {
 	});
 });
 
-
-// Watch for changes in the local folder and sync with the remote folder using rsync
-var localPath = path.join(__dirname, './source');
 
 const watcher = chokidar.watch(localPath, {
 	persistent: true

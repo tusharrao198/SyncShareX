@@ -61,6 +61,7 @@ function downloadFile(index) {
 	console.log("running rclone now");
 
 
+
 	//create rclone process
 	const rclone = spawn(
 		rclonePath,
@@ -76,7 +77,11 @@ function downloadFile(index) {
 		],
 		{ stdio: "inherit" }
 	);
+	//  --------------------------------------------------
+
 	
+	//  --------------------------------------------------
+		
 	rclone.on("close", (code) => {
 		readTokensFromModifiedConfig();
 		console.log(">>>------ Child process exited with code " + code);

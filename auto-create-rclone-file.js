@@ -55,7 +55,7 @@ async function saveCredentials(client) {
     });
     // const td_name = prompt("Enter Your SharedDrive ID: ");
     const td_name = "";
-    const payload1 = `[teamdrive-jack]\ntype = drive\nscope = drive\nclient_id = ${key.client_id}\nclient_secret = ${key.client_secret}\ntoken = ${data0}\nteam_drive = ${td_name}\nroot_folder_id =  \n`;
+    const payload1 = `[teamdrive-jack]\ntype = drive\nscope = drive\nclient_id = ${key.client_id}\nclient_secret = ${key.client_secret}\ntoken = ${data0}\nteam_drive = ${td_name}\nroot_folder_id =  \n\n[local]\ntype = local\n`;
     await fs.writeFile(CONF_PATH, payload1);
 
   await fs.writeFile(TOKEN_PATH, payload);
